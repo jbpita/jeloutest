@@ -80,6 +80,11 @@ DEFAULT_IDEMPOTENCY_KEY=demo-idem-123
 docker-compose build
 docker-compose up -d
 ```
+### en caso de que no se logren comunicar los contenedores, crear la red manualmente (SOLO LA PRIMERA VES)
+```bash
+  docker network create jelou_net
+```
+
 
 Esto levanta:
 
