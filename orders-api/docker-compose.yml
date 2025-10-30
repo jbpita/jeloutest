@@ -1,0 +1,23 @@
+services:
+  orders-api:
+    build: .
+    container_name: orders-api
+    environment:
+      PORT: 3000
+      MYSQL_HOST: host.docker.internal
+      MYSQL_PORT: 3307
+      MYSQL_USER: jbpitae
+      MYSQL_PASSWORD: "Jbpitae28231317*"
+      MYSQL_DATABASE: JelouDB
+      IDEMPOTENCY_TTL_HOURS: 24
+    ports:
+      - "3001:3000"
+    depends_on:
+      - mysql_db
+      - customers-api
+    networks:
+      - jelou_net
+
+networks:
+  jelou_net:
+    external: true

@@ -1,0 +1,31 @@
+service: lambda-orchestrator
+frameworkVersion: '3'
+useDotenv: true
+configValidationMode: error
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  environment:
+    CUSTOMERS_API_BASE: ${env:CUSTOMERS_API_BASE}
+    ORDERS_API_BASE: ${env:ORDERS_API_BASE}
+    JWT_SECRET: ${env:JWT_SECRET}
+
+plugins:
+  - serverless-dotenv-plugin
+  - serverless-offline
+
+custom:
+  dotenv:
+    path: .env
+  serverless-offline:
+    httpPort: ${env:OFFLINE_HTTP_PORT, '3003'}
+
+functions:
+  createAndConfirmOrder:
+    handler: dist/handler.createAndConfirmOrder
+    events:
+      - httpApi:
+          path: /orchestrator/create-and-confirm-order
+          method: post

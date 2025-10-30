@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  # ----------------- BASE DE DATOS -----------------
+  mysql_db:
+    extends:
+      file: ./db/docker-compose.yml
+      service: mysql_db
+    networks:
+      - jelou_net
+
+  # ----------------- CUSTOMERS API -----------------
+  customers-api:
+    extends:
+      file: ./customers-api/docker-compose.yml
+      service: customers-api
+    depends_on:
+      - mysql_db
+    networks:
+      - jelou_net
+
+  # ----------------- ORDERS API -----------------
+  orders-api:
+    extends:
+      file: ./orders-api/docker-compose.yml
+      service: orders-api
+    depends_on:
+      - mysql_db
+      - customers-api
+    networks:
+      - jelou_net
+
+# ----------------- RED COMPARTIDA Y VOLUMENES -----------------
+networks:
+  jelou_net:
+    driver: bridge
+
+volumes:
+  mysql_data:

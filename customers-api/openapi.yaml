@@ -1,0 +1,240 @@
+openapi: 3.0.3
+info:
+  title: Customers API
+  version: "1.1.0"
+  description: >
+    API para gestionar clientes del sistema Jelou.  
+    Implementa autenticación JWT para endpoints internos y documentación con OpenAPI/Swagger.
+
+servers:
+  - url: http://localhost:3002/api
+
+tags:
+  - name: Customers
+    description: Operaciones de gestión de clientes
+  - name: Internal
+    description: Endpoints internos autenticados por JWT
+  - name: Auth
+    description: Generación de tokens JWT
+
+paths:
+  /token:
+    post:
+      tags: [Auth]
+      summary: Generar token JWT
+      description: >
+        Crea un token JWT firmado con el secreto configurado (`JWT_SECRET`).  
+        Este token se usa para autenticar peticiones al endpoint interno `/internal/customers/:id`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                service:
+                  type: string
+                  example: "orders-service"
+      responses:
+        "200":
+          description: Token generado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        "400":
+          description: Parámetro faltante
+
+  /customers:
+    post:
+      tags: [Customers]
+      summary: Crear un cliente
+      description: Crea un nuevo cliente con nombre, email y teléfono. El email debe ser único.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCustomer"
+      responses:
+        "201":
+          description: Cliente creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "400":
+          description: Error de validación o email duplicado
+
+    get:
+      tags: [Customers]
+      summary: Buscar clientes
+      description: >
+        Devuelve una lista de clientes activos, con soporte para búsqueda y paginación.
+      parameters:
+        - in: query
+          name: search
+          schema: { type: string }
+          description: Texto para buscar por nombre, email o teléfono.
+        - in: query
+          name: cursor
+          schema: { type: integer, default: 0 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 10 }
+      responses:
+        "200":
+          description: Lista de clientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Customer"
+
+  /customers/{id}:
+    get:
+      tags: [Customers]
+      summary: Obtener cliente por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "404":
+          description: Cliente no encontrado
+
+    put:
+      tags: [Customers]
+      summary: Actualizar cliente
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCustomer"
+      responses:
+        "200":
+          description: Cliente actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+
+    delete:
+      tags: [Customers]
+      summary: Eliminar cliente (soft delete)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Cliente eliminado correctamente
+
+  /internal/customers/{id}:
+    get:
+      tags: [Internal]
+      summary: Obtener cliente (endpoint interno)
+      description: >
+        Endpoint protegido con JWT, usado por el servicio de Orders.  
+        Requiere el header `Authorization: Bearer <token>`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "401":
+          description: Token inválido o expirado
+        "404":
+          description: Cliente no encontrado
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CreateCustomer:
+      type: object
+      required: [name, email, phone]
+      properties:
+        name:
+          type: string
+          example: "Juan Pérez"
+        email:
+          type: string
+          format: email
+          example: "juan@example.com"
+        phone:
+          type: string
+          example: "+593987654321"
+
+    UpdateCustomer:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "Juan Pérez"
+        email:
+          type: string
+          example: "juan@example.com"
+        phone:
+          type: string
+          example: "+593987654321"
+        created_at:
+          type: string
+          format: date-time
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Unauthorized"
