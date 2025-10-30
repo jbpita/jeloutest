@@ -5,7 +5,7 @@ configValidationMode: error
 
 provider:
   name: aws
-  runtime: nodejs20.x
+  runtime: nodejs18.x
   region: us-east-1
   environment:
     CUSTOMERS_API_BASE: ${env:CUSTOMERS_API_BASE}
