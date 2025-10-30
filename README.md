@@ -79,6 +79,7 @@ DEFAULT_IDEMPOTENCY_KEY=demo-idem-123
 ```bash
 docker-compose build
 docker-compose up -d
+```
 
 Esto levanta:
 
@@ -116,13 +117,13 @@ http://localhost:3002/health
 
 🧮 Ejemplos cURL
 ➕ Crear cliente
-
+```bash
 curl -X POST http://localhost:3002/api/customers \
   -H "Content-Type: application/json" \
   -d '{"name": "ACME", "email": "ops@acme.com", "phone": "0999999999"}'
-
+```
 ➕ Crear orden
-
+```bash
 curl -X POST http://localhost:3001/api/orders \
   -H "Content-Type: application/json" \
   -d '{
@@ -131,24 +132,24 @@ curl -X POST http://localhost:3001/api/orders \
           {"product_id": 2, "qty": 3}
         ]
       }'
-
+```
 
 
 ✅ Confirmar orden
-
+```bash
 curl -X POST http://localhost:3001/api/orders/1/confirm \
   -H "X-Idempotency-Key: test-123"
-
+```
 --------------------------------------------------------------------------------------
 
 ⚡ Lambda Orchestrator
 🔹 Ejecutar localmente
-
+```bash
 cd lambda-orchestrator
 npm install
 npm run build
 npm run dev
-
+```
 
 Servicio disponible en:
 
@@ -156,6 +157,7 @@ http://localhost:3003/orchestrator/create-and-confirm-order
 
 
 🔹 Invocar desde Postman o cURL
+```bash
 curl -X POST http://localhost:3003/orchestrator/create-and-confirm-order \
   -H "Content-Type: application/json" \
   -d '{
@@ -164,7 +166,7 @@ curl -X POST http://localhost:3003/orchestrator/create-and-confirm-order \
     "idempotency_key": "abc-123",
     "correlation_id": "req-789"
   }'
-
+```
 
 🟢 Respuesta esperada
 {
@@ -188,25 +190,27 @@ curl -X POST http://localhost:3003/orchestrator/create-and-confirm-order \
   }
 }
 
---------NO SE PROVO ESTA PARTE SOLO LOCALMENTE SE AGREGA COMO INFORMACION 
+-----------------------
+## NO SE PROVO ESTA PARTE SOLO LOCALMENTE SE AGREGA COMO INFORMACION 
 
 ☁️ Despliegue en AWS
 
 Instalar dependencias:
-
+```bash
 npm install -g serverless
 npm install
-
+```
 
 Configurar credenciales AWS:
-
+```bash
 aws configure
-
+```
 
 Desplegar Lambda:
+```bash
 
 npx serverless deploy
-
+```
 
 Variables requeridas en AWS:
 
