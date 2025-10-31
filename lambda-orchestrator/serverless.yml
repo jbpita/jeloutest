@@ -21,6 +21,7 @@ custom:
     path: .env
   serverless-offline:
     httpPort: ${env:OFFLINE_HTTP_PORT, '3003'}
+    lambdaPort: 3005
 
 functions:
   createAndConfirmOrder:
